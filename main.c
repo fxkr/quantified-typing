@@ -7,6 +7,8 @@
 
 int main(int argc, char **argv)
 {
+	int rc = 1; /* Error */
+
 	dev_input_set_init();
 
 	/*
@@ -40,6 +42,8 @@ int main(int argc, char **argv)
 		}
 	} while (sig != SIGTERM && sig != SIGINT);
 
+	rc = 0;
+
 out:
-	return 0;
+	return rc;
 }
