@@ -1,5 +1,14 @@
 # Contributing
 
+
+## Design thoughts
+
+I went for a traditional thread-based approach. I do not consider this optimal,
+but I have gotten used to single-threaded, event-driven designs (typically based
+on libraries around epoll, like uloop or libevent) and wanted to try something
+different for once. It is nice in that it makes the code look more straightforward.
+
+
 ## Useful tools
 
 Preliminary note: below commands expect to run from a clean state, e.g.:
