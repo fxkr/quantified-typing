@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.14)
 project(quantified-typing C)
 
+set (CMAKE_C_STANDARD 11)
+
 find_package(PkgConfig REQUIRED)
 find_package(Threads REQUIRED)
 
