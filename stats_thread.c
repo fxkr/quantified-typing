@@ -124,13 +124,19 @@ static void stats_thread_flush(struct timeval *start_time,
       printf(",");
     else
       not_first = true;
+
     char bucket_name[32];
     bucket_index_to_bucket_name(i, &bucket_name, sizeof(bucket_name));
     printf("\"%s\":%d", bucket_name, stats_thread_data.bucket[i]);
-    stats_thread_data.bucket[i] = 0;
   }
 
   printf("}}\n");
+}
+
+static void stats_thread_reset_buckets(void) {
+  for (int i = 0; i < num_buckets; i++) {
+    stats_thread_data.bucket[i] = 0;
+  }
 }
 
 static void *stats_thread(void *arg) {
@@ -164,6 +170,7 @@ static void *stats_thread(void *arg) {
         pthread_mutex_unlock(&stats_thread_data.queue_mutex);
         stats_thread_flush(&e->value.flush.start_time,
                            &e->value.flush.start_time_local);
+        stats_thread_reset_buckets();
         pthread_mutex_lock(&stats_thread_data.queue_mutex);
         break;
       default:
