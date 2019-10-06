@@ -124,10 +124,9 @@ static void stats_thread_flush(struct timeval *start_time,
       printf(",");
     else
       not_first = true;
-    if (i != num_buckets - 1)
-      printf("\"%d\":%d", i, stats_thread_data.bucket[i]);
-    else
-      printf("\"infty\":%d", stats_thread_data.bucket[i]);
+    char bucket_name[32];
+    bucket_index_to_bucket_name(i, &bucket_name, sizeof(bucket_name));
+    printf("\"%s\":%d", bucket_name, stats_thread_data.bucket[i]);
     stats_thread_data.bucket[i] = 0;
   }
 
