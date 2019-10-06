@@ -6,7 +6,9 @@
 I went for a traditional thread-based approach. I do not consider this optimal,
 but I have gotten used to single-threaded, event-driven designs (typically based
 on libraries around epoll, like uloop or libevent) and wanted to try something
-different for once. It is nice in that it makes the code look more straightforward.
+different for once. It is nice in that it makes the code look more straightforward
+(even though of course the appearance is deceiving; in reality this concurrency
+based on shared memory and synchronization primitives is unnecessarily complex).
 
 
 ## Useful tools
