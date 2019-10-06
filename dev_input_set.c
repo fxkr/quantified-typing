@@ -14,15 +14,13 @@ LIST_HEAD(listhead, entry) head;
 struct head *headp;
 
 struct entry {
-	LIST_ENTRY(entry) entries;
+  LIST_ENTRY(entry) entries;
 
-	char *name;
-} *dev_list;
+  char *name;
+} * dev_list;
 
 /* Not thread-safe! */
-void dev_input_set_init(void) {
-	LIST_INIT(&head);
-}
+void dev_input_set_init(void) { LIST_INIT(&head); }
 
 /*
  * Add string to set.
@@ -33,49 +31,49 @@ void dev_input_set_init(void) {
  * Operation is O(n) - set is assumed to be small!
  */
 int dev_input_set_add(char *name) {
-	int rc = 0;
+  int rc = 0;
 
-	struct entry *e = calloc(sizeof(*e), 1);
-	if (!e) {
-		fprintf(stderr, "error: %m\n");
-		goto err_1;
-	}
-	
-	e->name = strdup(name);
-	if (!e->name) {
-		fprintf(stderr, "error: %m\n");
-		goto err_2;
-	}
+  struct entry *e = calloc(sizeof(*e), 1);
+  if (!e) {
+    fprintf(stderr, "error: %m\n");
+    goto err_1;
+  }
 
-	pthread_mutex_lock(&lock);
+  e->name = strdup(name);
+  if (!e->name) {
+    fprintf(stderr, "error: %m\n");
+    goto err_2;
+  }
 
-	struct entry *np;
-	bool was_already_present = false;
-	for (np = head.lh_first; np != NULL; np = np->entries.le_next) {
-		if (0 == strcmp(e->name, np->name)) {
-			was_already_present = true;
-			break;
-		}
-	}
+  pthread_mutex_lock(&lock);
 
-	if (!was_already_present) {
-		LIST_INSERT_HEAD(&head, e, entries);
-	}
+  struct entry *np;
+  bool was_already_present = false;
+  for (np = head.lh_first; np != NULL; np = np->entries.le_next) {
+    if (0 == strcmp(e->name, np->name)) {
+      was_already_present = true;
+      break;
+    }
+  }
 
-	pthread_mutex_unlock(&lock);
+  if (!was_already_present) {
+    LIST_INSERT_HEAD(&head, e, entries);
+  }
 
-	if (was_already_present) {
-		goto err_3;
-	}
-	
-	return 0; /* Success */
+  pthread_mutex_unlock(&lock);
+
+  if (was_already_present) {
+    goto err_3;
+  }
+
+  return 0; /* Success */
 
 err_3:
-	free(e->name);
+  free(e->name);
 err_2:
-	free(e);
+  free(e);
 err_1:
-	return 1;
+  return 1;
 }
 
 /*
@@ -86,17 +84,17 @@ err_1:
  * Operation is O(n) - set is assumed to be small!
  */
 void dev_input_set_remove(char *name) {
-	pthread_mutex_lock(&lock);
+  pthread_mutex_lock(&lock);
 
-	struct entry *np;
-	for (np = head.lh_first; np != NULL; np = np->entries.le_next) {
-		if (0 == strcmp(name, np->name)) {
-			LIST_REMOVE(np, entries);
-			free(np->name);
-			free(np);
-			break;
-		}
-	}
+  struct entry *np;
+  for (np = head.lh_first; np != NULL; np = np->entries.le_next) {
+    if (0 == strcmp(name, np->name)) {
+      LIST_REMOVE(np, entries);
+      free(np->name);
+      free(np);
+      break;
+    }
+  }
 
-	pthread_mutex_unlock(&lock);
+  pthread_mutex_unlock(&lock);
 }

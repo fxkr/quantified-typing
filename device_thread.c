@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
+#include <time.h>
 #include <unistd.h>
 
 #include <libevdev/libevdev.h>
@@ -12,12 +14,15 @@
 #include <linux/input.h>
 
 #include "dev_input_set.h"
+#include "stats_thread.h"
+#include "util.h"
 
 #include "device_thread.h"
 
 struct device_thread_data {
 	char *path;
 	struct libevdev *dev;
+	struct timespec last_time_mono;
 };
 
 static void device_thread_data_free(struct device_thread_data *h)
@@ -50,7 +55,7 @@ static void device_thread_data_free(struct device_thread_data *h)
 	free(h);
 }
 
-static void device_thread_handle_event(const struct input_event *event)
+static void device_thread_handle_event(struct device_thread_data *thread, const struct input_event *event)
 {
 	if (!libevdev_event_is_type(event, EV_KEY)) {
 		return;
@@ -61,12 +66,25 @@ static void device_thread_handle_event(const struct input_event *event)
 		return;
 	}
 
-	const char *p = libevdev_event_code_get_name(event->type, event->code) + 4;
-	if (strlen(p) == 1) {
-		printf("debug: key: %c\n", *p);
-	} else {
-		printf("debug: key: <%s>\n", p);
+	struct timespec cur_time;
+	clock_gettime(CLOCK_MONOTONIC, &cur_time);
+
+	/* check for time warps */
+	if (cur_time.tv_sec < thread->last_time_mono.tv_sec ||
+	    (cur_time.tv_sec == thread->last_time_mono.tv_sec && cur_time.tv_nsec < thread->last_time_mono.tv_nsec)) {
+		/* should never happen, but kernel bugs have caused this before */
+		fprintf(stderr, "fatal: CLOCK_MONOTONIC jumped backwards\n");
+		abort();
 	}
+
+	struct timespec delta_time;
+	timespec_subtract(&delta_time, &cur_time, &thread->last_time_mono);
+
+	memcpy(&thread->last_time_mono, &cur_time, sizeof(struct timespec));
+
+	clock_gettime(CLOCK_MONOTONIC, &thread->last_time_mono);
+
+	stats_thread_submit_key(&cur_time, &delta_time);
 }
 
 static void *device_thread(void *arg)
@@ -84,7 +102,7 @@ static void *device_thread(void *arg)
 				&event);
 
 		if (rc == LIBEVDEV_READ_STATUS_SUCCESS) {
-			device_thread_handle_event(&event);
+			device_thread_handle_event(thread, &event);
 		}
 
 	} while (rc == LIBEVDEV_READ_STATUS_SYNC

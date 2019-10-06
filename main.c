@@ -4,6 +4,8 @@
 
 #include "dev_input_set.h"
 #include "inotify_thread.h"
+#include "stats_thread.h"
+#include "stats_flush_thread.h"
 
 int main(int argc, char **argv)
 {
@@ -22,6 +24,16 @@ int main(int argc, char **argv)
 	}
 	if (0 != sigprocmask(SIG_SETMASK, &sigset, NULL)) {
 		fprintf(stderr, "error: failed to set signal mask: %m\n");
+		goto out; /* Error */
+	}
+
+	/* All events will flow into this thread. */
+	if (0 != spawn_stats_thread()) {
+		goto out; /* Error */
+	}
+
+	/* This thread periodically inserts flush events. */
+	if (0 != spawn_stats_flush_thread()) {
 		goto out; /* Error */
 	}
 
