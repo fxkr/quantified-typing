@@ -3,6 +3,15 @@
 
 ## Design thoughts
 
+Preface: this is a hobby project, where I'm trying to do things a bit
+differently than I'd normally do them.
+
+This is the third (and only actually usable/complete) iteration of this tool.
+The first version was written a few years back, and it was based on Xlib.
+It broke when I moved to Wayland. So the second version was a kernel module.
+This is too annoying to actually deploy/maintain.
+So now the third version is based on libevdev.
+
 I went for a traditional thread-based approach. I do not consider this optimal,
 but I have gotten used to single-threaded, event-driven designs (typically based
 on libraries around epoll, like uloop or libevent) and wanted to try something
