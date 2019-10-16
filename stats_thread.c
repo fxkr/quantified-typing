@@ -5,6 +5,8 @@
 #include <stdlib.h> // IWYU pragma: keep // required for abort
 #include <sys/queue.h>
 
+#include "journal.h"
+
 #include "stats_thread.h"
 
 int const max_bucket_ms = 2000;
@@ -110,28 +112,53 @@ static void bucket_add_msec(int msec) {
 static void stats_thread_flush(struct timeval *start_time,
                                struct tm *start_time_local) {
 
-  char start_time_local_str[32];
+  char start_time_local_str[64];
+  char bucket_name[32];
+  char buf[65536];
+  char *buf_end = &buf[sizeof(buf)];
+  char *buf_ptr = buf;
+  int ret;
+
   strftime(start_time_local_str, sizeof(start_time_local_str),
            "%Y-%m-%d %H:%M:%S", start_time_local);
 
-  printf("{\"t\":\"%ld\",\"tz\":\"%s\",\"events\":{", start_time->tv_sec,
-         start_time_local_str);
+  ret = snprintf(buf_ptr, buf_end - buf_ptr,
+                 "{\"t\":\"%ld\",\"tz\":\"%s\",\"e\":{", start_time->tv_sec,
+                 start_time_local_str);
+  if (ret < 0 || buf_ptr + ret >= buf_end)
+    goto err;
+  buf_ptr += ret;
 
   bool not_first = false;
   for (int i = 0; i < num_buckets; i++) {
     if (stats_thread_data.bucket[i] <= 0)
       continue;
-    if (not_first)
-      printf(",");
-    else
+    if (not_first) {
+      ret = snprintf(buf_ptr, buf_end - buf_ptr, ",");
+      if (ret < 0 || buf_ptr + ret >= buf_end)
+        goto err;
+      buf_ptr += ret;
+    } else {
       not_first = true;
+    }
 
-    char bucket_name[32];
-    bucket_index_to_bucket_name(i, &bucket_name, sizeof(bucket_name));
-    printf("\"%s\":%d", bucket_name, stats_thread_data.bucket[i]);
+    bucket_index_to_bucket_name(i, bucket_name, sizeof(bucket_name));
+    ret = snprintf(buf_ptr, buf_end - buf_ptr, "\"%s\":%d", bucket_name,
+                   stats_thread_data.bucket[i]);
+    if (ret < 0 || buf_ptr + ret >= buf_end)
+      goto err;
+    buf_ptr += ret;
   }
 
-  printf("}}\n");
+  ret = snprintf(buf_ptr, buf_end - buf_ptr, "}}\n");
+  if (ret < 0 || buf_ptr + ret >= buf_end)
+    goto err;
+  buf_ptr += ret;
+
+  journal_add("%s", buf);
+
+err:
+  return;
 }
 
 static void stats_thread_reset(void) {

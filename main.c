@@ -6,12 +6,17 @@
 #include "inotify_thread.h"
 #include "stats_thread.h"
 #include "stats_flush_thread.h"
+#include "journal.h"
 
 int main(int argc, char **argv)
 {
 	int rc = 1; /* Error */
 
 	dev_input_set_init();
+
+	if (0 != journal_init()) {
+		goto out; /* Error */
+	}
 
 	/*
 	 * Mask all signals before starting other threads.
@@ -57,5 +62,7 @@ int main(int argc, char **argv)
 	rc = 0;
 
 out:
+	journal_fini();
+
 	return rc;
 }
