@@ -197,8 +197,9 @@ static void *stats_thread(void *arg) {
 
       case STATS_THREAD_EVENT_TYPE_FLUSH:
         pthread_mutex_unlock(&stats_thread_data.queue_mutex);
-        stats_thread_flush(&e->value.flush.start_time,
-                           &e->value.flush.start_time_local);
+        if (stats_thread_data.num_keys > 0)
+          stats_thread_flush(&e->value.flush.start_time,
+                             &e->value.flush.start_time_local);
         stats_thread_reset();
         pthread_mutex_lock(&stats_thread_data.queue_mutex);
         break;
