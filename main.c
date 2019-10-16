@@ -18,6 +18,10 @@ int main(int argc, char **argv)
 		goto out; /* Error */
 	}
 
+	if (0 != status_flush_thread_init()) {
+		goto out; /* Error */
+	}
+
 	/*
 	 * Mask all signals before starting other threads.
 	 * Child threads inherit main thread's signal mask.

@@ -8,9 +8,10 @@
 
 #include "stats_flush_thread.h"
 
-static void *stats_flush_thread(void *arg) {
-  const long interval_sec = 10;
+/* May be overwritten via $INTERVAL environment variable. */
+static long interval_sec = 60;
 
+static void *stats_flush_thread(void *arg) {
   while (true) {
     /* Current time (somewhere within some interval) */
     struct timeval now;
@@ -76,4 +77,32 @@ out_2:
   pthread_attr_destroy(&pthread_attr);
 out_1:
   return ret;
+}
+
+int status_flush_thread_init(void) {
+  char *interval_str;
+  int interval;
+
+  interval_str = getenv("INTERVAL");
+  if (!interval_str)
+    return 0;
+
+  interval = atol(interval_str);
+  if (!interval)
+    return 0;
+
+  if (interval < 1 || interval > 60 * 60 * 24) {
+    fprintf(stderr, "error: bad interval: $d. must be between 1 and 86400.\n",
+            interval);
+    return 1;
+  }
+  if (interval < 60 ? 60 % interval != 0 : interval % 60 != 0) {
+    fprintf(stderr, "error: bad interval: $d. a multiple or divisor of 60.\n",
+            interval);
+    return 1;
+  }
+
+  interval_sec = interval;
+
+  return 0;
 }
