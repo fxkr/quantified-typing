@@ -10,6 +10,8 @@ pkg_check_modules(MY_PKG REQUIRED IMPORTED_TARGET libevdev)
 
 add_executable(quantified-typing main.c inotify_thread.c device_thread.c stats_flush_thread.c stats_thread.c dev_input_set.c journal.c util.c)
 
+install(TARGETS quantified-typing RUNTIME DESTINATION bin)
+
 target_link_libraries(quantified-typing
     PkgConfig::MY_PKG
     ${CMAKE_THREAD_LIBS_INIT})
