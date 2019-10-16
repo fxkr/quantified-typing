@@ -1,0 +1,12 @@
+[Unit]
+Description=Typing speed statistics
+
+[Service]
+ExecStart=/usr/bin/quantified-typing
+DynamicUser=yes
+ProtectHome=yes
+SupplementaryGroups=input
+LogsDirectory=quantified-typing
+
+[Install]
+WantedBy=multi-user.target
