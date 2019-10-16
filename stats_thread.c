@@ -104,6 +104,7 @@ static int bucket_index_to_bucket_name(int idx, char *out, size_t out_len) {
 
 static void bucket_add_msec(int msec) {
   stats_thread_data.bucket[bucket_index_from_msec(msec)]++;
+  stats_thread_data.num_keys++;
 }
 
 static void stats_thread_flush(struct timeval *start_time,
@@ -133,7 +134,8 @@ static void stats_thread_flush(struct timeval *start_time,
   printf("}}\n");
 }
 
-static void stats_thread_reset_buckets(void) {
+static void stats_thread_reset(void) {
+  stats_thread_data.num_keys = 0;
   for (int i = 0; i < num_buckets; i++) {
     stats_thread_data.bucket[i] = 0;
   }
@@ -170,7 +172,7 @@ static void *stats_thread(void *arg) {
         pthread_mutex_unlock(&stats_thread_data.queue_mutex);
         stats_thread_flush(&e->value.flush.start_time,
                            &e->value.flush.start_time_local);
-        stats_thread_reset_buckets();
+        stats_thread_reset();
         pthread_mutex_lock(&stats_thread_data.queue_mutex);
         break;
       default:
