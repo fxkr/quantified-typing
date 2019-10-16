@@ -20,6 +20,16 @@ different for once. It is nice in that it makes the code look more straightforwa
 based on shared memory and synchronization primitives is unnecessarily complex).
 
 
+## Building
+
+```sh
+mkdir build
+cd build
+cmake ..
+make
+cpack
+```
+
 ## Useful tools
 
 Preliminary note: below commands expect to run from a clean state, e.g.:

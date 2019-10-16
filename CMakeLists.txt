@@ -17,3 +17,7 @@ install(FILES quantified-typing.service DESTINATION /usr/lib/systemd/system)
 target_link_libraries(quantified-typing
     PkgConfig::MY_PKG
     ${CMAKE_THREAD_LIBS_INIT})
+
+set(CPACK_GENERATOR "RPM")
+#set(CPACK_DEBIAN_PACKAGE_MAINTAINER "KK") #required
+include(CPack)
