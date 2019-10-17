@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 project(quantified-typing
-    VERSION 0.1.2
+    VERSION 0.1.3
     DESCRIPTION "Measuring typing speed over the day"
     HOMEPAGE_URL "https://github.com/fxkr/quantified-typing"
     LANGUAGES C)
