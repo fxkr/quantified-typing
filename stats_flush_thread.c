@@ -9,7 +9,7 @@
 #include "stats_flush_thread.h"
 
 /* May be overwritten via $INTERVAL environment variable. */
-static long interval_sec = 60;
+static long interval_sec = 300;
 
 static void *stats_flush_thread(void *arg) {
   while (true) {
