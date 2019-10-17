@@ -97,7 +97,7 @@ int status_flush_thread_init(void) {
     return 1;
   }
   if (interval < 60 ? 60 % interval != 0 : interval % 60 != 0) {
-    fprintf(stderr, "error: bad interval: $d. a multiple or divisor of 60.\n",
+    fprintf(stderr, "error: bad interval: $d. must be a multiple or divisor of 60.\n",
             interval);
     return 1;
   }
