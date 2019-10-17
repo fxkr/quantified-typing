@@ -123,7 +123,7 @@ static void stats_thread_flush(struct timeval *start_time,
            "%Y-%m-%d %H:%M:%S", start_time_local);
 
   ret = snprintf(buf_ptr, buf_end - buf_ptr,
-                 "{\"t\":\"%ld\",\"tz\":\"%s\",\"e\":{", start_time->tv_sec,
+                 "{\"t\":\"%ld\",\"l\":\"%s\",\"e\":{", start_time->tv_sec,
                  start_time_local_str);
   if (ret < 0 || buf_ptr + ret >= buf_end)
     goto err;
