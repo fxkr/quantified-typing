@@ -6,9 +6,9 @@ Measuring typing speed over the day.
 * SPDX license code: GPL-3.0-or-later
 * Status: alpha - using it myself (Oct 2019)
 
-This tool collects the delays between key presses in a journal.
+This tool collects the delays between key presses and stores them in a journal.
 
-The journal consists of lines, each representing a 5 minute interval.
+The journal consists of lines, each representing a 5 minute interval (by default).
 Each line consists of a timestamp, as well as buckets.
 Each bucket represents a delay between two keypresses (by default, the buckets are 0sec to 2sec, with 10msec spacing, and an overflow bucket).
 The bucket value is how often that delay between two key presses occured with the interval.
